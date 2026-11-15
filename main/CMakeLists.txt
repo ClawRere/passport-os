@@ -69,6 +69,7 @@ idf_component_register(
         "apps/game/tetris_core.c"
         "apps/game/app_tetris.cc"
         "apps/voice/time_sync.c"
+        "apps/voice/nvs_settings.c"
          "apps/ir/app_ir.cc"
          "apps/voicememo/app_voicememo.cc"
     INCLUDE_DIRS
