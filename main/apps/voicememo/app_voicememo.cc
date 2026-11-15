@@ -48,6 +48,7 @@ static void update_list(void) {
 void init(void) {
     strcpy(s_dir, "/memos");
     mkdir(s_dir, 0755);
+    bsp_audio_init_playback();
     scan_files(); s_cur = 0;
 }
 
