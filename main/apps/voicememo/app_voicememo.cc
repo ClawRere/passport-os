@@ -20,7 +20,6 @@ static uint8_t s_buf[K_BUF];
 static lv_obj_t *s_screen, *s_status, *s_list;
 static int s_total = 0, s_cur = 0, s_nums[K_MAX_N];
 static char s_dir[K_DIR_LEN];
-static bool s_started = false;
 
 static void scan_files(void) {
     s_total = 0;
