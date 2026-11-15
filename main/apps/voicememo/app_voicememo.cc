@@ -1,4 +1,4 @@
-﻿#include "apps/app_base.h"
+#include "apps/app_base.h"
 #include "launcher/app_registry.h"
 #include "bsp_display.h"
 #include "bsp_audio.h"

@@ -1,4 +1,4 @@
-﻿#include "apps/app_base.h"
+#include "apps/app_base.h"
 #include "ir_nec.h"
 #include "launcher/app_registry.h"
 #include "bsp_display.h"

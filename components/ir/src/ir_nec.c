@@ -1,4 +1,4 @@
-﻿// ir_nec.c - NEC IR TX via GPIO toggle loop
+// ir_nec.c - NEC IR TX via GPIO toggle loop
 #include "ir_nec.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
