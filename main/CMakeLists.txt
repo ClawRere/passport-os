@@ -1,9 +1,3 @@
-option(PASSPORT_MUSE_USE_JOLLYBOT "Build Muse with the official Jollybot artwork" ON)
-if(PASSPORT_MUSE_USE_JOLLYBOT)
-    set(PASSPORT_MUSE_AVATAR "apps/muse/muse_avatar_frames.c")
-else()
-    set(PASSPORT_MUSE_AVATAR "apps/muse/muse_avatar_public_frames.c")
-endif()
 idf_component_register(
     EMBED_FILES "apps/home/cities.json.gz"
     SRCS
@@ -44,21 +38,8 @@ idf_component_register(
         "apps/radio/radio_source.cc"
         "apps/radio/radio_sleep_timer.cc"
         "apps/radio/radio_ui.cc"
-        "apps/voice/app_voice.cc"
-        "apps/voice/adpcm.c"
-        "apps/voice/audio_streamer.c"
-        "apps/voice/udp_audio.c"
-        "apps/voice/app_protocol.c"
-        "apps/voice/app_sound.c"
-        "apps/voice/app_events.c"
-        "apps/voice/app_ui.c"
-        "apps/voice/app_state.c"
-        "apps/voice/time_sync.c"
         "ui/ui_pixel.c"
         "ui/ui_capture.c"
-        "apps/voice/ui_pixel_math.c"
-        "apps/voice/mode.c"
-        "apps/voice/nvs_settings.c"
         "apps/xiaozhi/xiaozhi_protocol.cc"
         "apps/xiaozhi/xiaozhi_audio.cc"
         "apps/xiaozhi/xiaozhi_ui.cc"
@@ -79,22 +60,12 @@ idf_component_register(
         "apps/home/band_art.c"
         "apps/home/home_upload.cc"
         "apps/home/app_home.cc"
-        "apps/game/game_core.c"
-        "apps/game/game_mic.c"
-        "apps/game/game_sfx.c"
-        "apps/game/app_game.cc"
-        "apps/sound_jump/jump_core.c"
-        "apps/sound_jump/jump_voice.c"
-        "apps/sound_jump/jump_mic.c"
-        "apps/sound_jump/app_sound_jump.cc"
         "apps/stopwatch/stopwatch_core.c"
         "apps/stopwatch/app_stopwatch.cc"
         "apps/pomodoro/pomodoro_core.c"
         "apps/pomodoro/app_pomodoro.cc"
         "apps/pomodoro/pomodoro_font_20.c"
         "apps/pomodoro/pomodoro_digits_48.c"
-        "apps/muse/app_muse.cc"
-        "${PASSPORT_MUSE_AVATAR}"
         "apps/game/tetris_core.c"
         "apps/game/app_tetris.cc"
          "apps/ir/app_ir.cc"
@@ -104,14 +75,12 @@ idf_component_register(
         "launcher"
         "apps"
         "apps/radio"
-        "apps/voice"
         "apps/xiaozhi"
         "apps/home"
         "apps/game"
         "ui"
         "fonts"
     REQUIRES
-        passport_muse
         bsp
         ir
         esp-wifi-connect

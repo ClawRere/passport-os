@@ -31,16 +31,12 @@ static const char *TAG = "app_registry";
 
 // 外部 App 实例前向声明
 extern const passport_app_t g_radio_app;
-extern const passport_app_t g_voice_app;
 extern const passport_app_t g_xiaozhi_app;
 extern const passport_app_t g_wifi_app;
 extern const passport_app_t g_settings_app;
 extern const passport_app_t g_home_app;
-extern const passport_app_t g_game_app;
 extern const passport_app_t g_tetris_app;
 extern const passport_app_t g_stopwatch_app;
-extern const passport_app_t g_sound_jump_app;
-extern const passport_app_t g_muse_app;
 extern const passport_app_t g_pomodoro_app;
 extern const passport_app_t g_netease_app;
 extern const passport_app_t g_reminders_app;
@@ -58,15 +54,11 @@ const passport_app_t *s_apps[] = {
     &g_xiaozhi_app,
     &g_radio_app,
     &g_netease_app,
-    &g_voice_app,
-    &g_muse_app,
     &g_pomodoro_app,
     &g_stopwatch_app,
     &g_reminders_app,
     &g_lists_app,
     &g_tetris_app,
-    &g_game_app,
-    &g_sound_jump_app,
     &g_ir_app,
     &g_voicememo_app,
     &g_settings_app,   // 设置放最后(应用惯用收尾位置)
@@ -109,9 +101,7 @@ WifiPowerSaveLevel power_save_level_for(passport_app_id_t id) {
     switch (id) {
         case APP_ID_RADIO:
         case APP_ID_NETEASE:
-        case APP_ID_VOICE:
         case APP_ID_XIAOZHI:
-        case APP_ID_MUSE:
             return WifiPowerSaveLevel::BALANCED;
         default:
             return WifiPowerSaveLevel::LOW_POWER;
@@ -141,7 +131,6 @@ HeapNeed heap_need(passport_app_id_t id) {
         // Same MP3 decoder as Radio; logged-in requests add TLS only while it is closed.
         case APP_ID_NETEASE: return {24 * 1024, 48 * 1024};
         case APP_ID_XIAOZHI: return {16 * 1024, 64 * 1024};
-        case APP_ID_MUSE: return {20 * 1024, 44 * 1024};
         default: return {0, 0};
     }
 }
@@ -154,7 +143,7 @@ bool s_heap_strained = false;
 bool s_fresh_heap = false;
 
 bool heavy_app(passport_app_id_t id) {
-    return id == APP_ID_RADIO || id == APP_ID_NETEASE || id == APP_ID_XIAOZHI || id == APP_ID_MUSE;
+    return id == APP_ID_RADIO || id == APP_ID_NETEASE || id == APP_ID_XIAOZHI ;
 }
 
 // 在旧应用 stop() 之后调用:此时测到的才是新应用可用的堆。
@@ -546,6 +535,22 @@ void app_registry_dispatch_key(uint8_t btn, app_btn_event_t event, uint16_t mv) 
         s_start_xiaozhi_conversation = true;
         s_pending_target = APP_ID_XIAOZHI;
         app_registry_switch_to(APP_ID_XIAOZHI);
+        return;
+    }
+
+    // Triple-click OK: pause/resume the active foreground app (e.g. netease
+    // toggles play/pause on BTN_EVT_CLICK; dispatching TRIPLE with the same
+    // key lets that existing handler fire without a new toggle command).
+    if (btn == BSP_BTN_OK && event == BTN_EVT_TRIPLE) {
+        const auto trip_src = s_active_id.load();
+        if (trip_src != APP_ID_LAUNCHER && trip_src != APP_ID_HOME) {
+            const passport_app_t *a = app_registry_get_by_id(trip_src);
+            if (a && a->on_key) {
+                ESP_LOGI(TAG, "Triple-click: dispatch to %d", (int)trip_src);
+                a->on_key(btn, event, mv);
+                return;
+            }
+        }
         return;
     }
 
