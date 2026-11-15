@@ -97,6 +97,8 @@ idf_component_register(
         "${PASSPORT_MUSE_AVATAR}"
         "apps/game/tetris_core.c"
         "apps/game/app_tetris.cc"
+         "apps/ir/app_ir.cc"
+         "apps/voicememo/app_voicememo.cc"
     INCLUDE_DIRS
         "."
         "launcher"
@@ -111,6 +113,7 @@ idf_component_register(
     REQUIRES
         passport_muse
         bsp
+        ir
         esp-wifi-connect
         esp_wifi
         nvs_flash
