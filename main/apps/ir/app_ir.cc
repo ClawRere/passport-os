@@ -2,7 +2,7 @@
 #include "ir_nec.h"
 #include "launcher/app_registry.h"
 #include "bsp_display.h"
-#include "ui_pixel.h"
+#include "ui/ui_pixel.h"
 #include "app_fonts.h"
 #include "esp_log.h"
 #include "lvgl.h"
@@ -28,7 +28,7 @@ void start(void) {
     ui_pixel_background(s_screen);
     ui_pixel_label(ui_pixel_top_bar(s_screen), "红外遥控", &buddy_font_16, UI_TEXT);
     s_status = nullptr;
-    set_text(&s_status, "就绪 · 按OK发信�?);
+    set_text(&s_status, "就绪 · 按OK发信号");
     ui_pixel_footer(s_screen, "", "长按确定返回", &buddy_font_16);
     lv_screen_load(s_screen);
     bsp_lvgl_unlock();
@@ -46,7 +46,7 @@ void on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
     if (!s_screen) { bsp_lvgl_unlock(); return; }
     if (btn == BSP_BTN_OK && !ir_nec_is_tx_busy()) {
         ir_send_power_toggle();
-        set_text(&s_status, "已发�?· OK再发");
+        set_text(&s_status, "已发送 · OK再发");
     }
     bsp_lvgl_unlock();
 }
