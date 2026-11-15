@@ -44,14 +44,14 @@ static void update_list(void) {
     if (s_list) lv_label_set_text(s_list, label);
 }
 
-void init(void) {
+static void init(void) {
     strcpy(s_dir, "/memos");
     mkdir(s_dir, 0755);
     bsp_audio_init_playback();
     scan_files(); s_cur = 0;
 }
 
-void start(void) {
+static void start(void) {
     if (!bsp_lvgl_lock(1000)) return;
     if (s_screen) { bsp_lvgl_unlock(); return; }
     s_screen = lv_obj_create(nullptr);
@@ -83,14 +83,14 @@ void start(void) {
     bsp_lvgl_unlock();
 }
 
-void stop(void) {
+static void stop(void) {
     if (!bsp_lvgl_lock(-1)) return;
     if (s_state == S_RECORDING && s_fp) { fclose(s_fp); s_fp = nullptr; s_state = S_IDLE; }
     if (s_screen) { lv_obj_delete(s_screen); s_screen = nullptr; }
     bsp_lvgl_unlock();
 }
 
-void on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
+static void on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
     (void)mv;
     if (event != BTN_EVT_CLICK || !bsp_lvgl_lock(500)) return;
     if (!s_screen) { bsp_lvgl_unlock(); return; }

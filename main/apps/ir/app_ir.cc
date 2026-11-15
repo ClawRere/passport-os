@@ -19,9 +19,9 @@ static void set_text(lv_obj_t **dst, const char *txt) {
     lv_obj_set_size(*dst, 216, 24);
 }
 
-void init(void) { ir_nec_init(); }
+static void init(void) { ir_nec_init(); }
 
-void start(void) {
+static void start(void) {
     if (!bsp_lvgl_lock(1000)) return;
     if (s_screen) { bsp_lvgl_unlock(); return; }
     s_screen = lv_obj_create(nullptr);
@@ -34,13 +34,13 @@ void start(void) {
     bsp_lvgl_unlock();
 }
 
-void stop(void) {
+static void stop(void) {
     if (!bsp_lvgl_lock(-1)) return;
     if (s_screen) { lv_obj_delete(s_screen); s_screen = nullptr; }
     bsp_lvgl_unlock();
 }
 
-void on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
+static void on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
     (void)mv;
     if (event != BTN_EVT_CLICK || !bsp_lvgl_lock(500)) return;
     if (!s_screen) { bsp_lvgl_unlock(); return; }
