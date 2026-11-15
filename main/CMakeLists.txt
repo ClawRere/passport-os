@@ -99,6 +99,8 @@ idf_component_register(
         esp_http_server
         spiffs
         lwip
+    PRIV_REQUIRES
+        passport_muse
 )
 target_link_options(${COMPONENT_LIB} INTERFACE
     "-Wl,--undefined=__wrap_opus_encoder_create,--undefined=__wrap_opus_encoder_destroy"
