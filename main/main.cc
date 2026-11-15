@@ -265,6 +265,12 @@ static void system_monitor_task(void *arg) {
     }
 }
 
+// Helper: dispatch a virtual key press through the same path as a physical button.
+// Keeps handle_serial_command readable; each variant is one line instead of three.
+static void serial_press(uint8_t btn, app_btn_event_t evt, uint16_t mv) {
+    app_registry_dispatch_key(btn, evt, mv);
+}
+
 static void handle_serial_command(int c) {
     if (c == 'R') { app_registry_switch_to(APP_ID_REMINDERS); return; }
     if (c == 'N') { app_registry_switch_to(APP_ID_NETEASE); return; }
@@ -273,33 +279,26 @@ static void handle_serial_command(int c) {
     if (c == 'x') { app_registry_dispatch_key(BSP_BTN_OK, BTN_EVT_DOUBLE, 600); return; }
     if (c == 'u' || c == 'U' || c == '+') {
         ESP_LOGI(TAG, "[SerialCmd] UP (+) button clicked");
-        KeyMessage msg = {.button = BSP_BTN_UP, .event = BTN_EVT_CLICK, .mv = 15};
-        app_registry_dispatch_key(msg.button, msg.event, msg.mv);
+        serial_press(BSP_BTN_UP, BTN_EVT_CLICK, 15);
     } else if (c == 'd' || c == 'D' || c == '-') {
         ESP_LOGI(TAG, "[SerialCmd] DOWN (-) button clicked");
-        KeyMessage msg = {.button = BSP_BTN_DOWN, .event = BTN_EVT_CLICK, .mv = 1060};
-        app_registry_dispatch_key(msg.button, msg.event, msg.mv);
+        serial_press(BSP_BTN_DOWN, BTN_EVT_CLICK, 1060);
     } else if (c == 'o' || c == 'O' || c == '\r' || c == '\n') {
         ESP_LOGI(TAG, "[SerialCmd] OK button clicked");
-        KeyMessage msg = {.button = BSP_BTN_OK, .event = BTN_EVT_CLICK, .mv = 2070};
-        app_registry_dispatch_key(msg.button, msg.event, msg.mv);
+        serial_press(BSP_BTN_OK, BTN_EVT_CLICK, 2070);
     } else if (c == 'l' || c == 'L' || c == 'b' || c == 'B') {
         ESP_LOGI(TAG, "[SerialCmd] LONG OK / Back button triggered");
-        KeyMessage msg = {.button = BSP_BTN_OK, .event = BTN_EVT_LONG, .mv = 2070};
-        app_registry_dispatch_key(msg.button, msg.event, msg.mv);
+        serial_press(BSP_BTN_OK, BTN_EVT_LONG, 2070);
     } else if (c == 'k' || c == 'K') {
         // 调试用:长按下键。首页的上传模式(手机配网/传头像)绑在这个手势上,
         // 没有串口映射就无法脱离真机按键验证。
         ESP_LOGI(TAG, "[SerialCmd] LONG DOWN (-) button triggered");
-        KeyMessage msg = {.button = BSP_BTN_DOWN, .event = BTN_EVT_LONG, .mv = 1060};
-        app_registry_dispatch_key(msg.button, msg.event, msg.mv);
+        serial_press(BSP_BTN_DOWN, BTN_EVT_LONG, 1060);
     } else if (c == '[' || c == ']') {
         // Diagnostic PTT pair: same event queue and handler as the physical UP key.
         ESP_LOGI(TAG, "[SerialCmd] UP %s", c == '[' ? "press" : "release");
-        KeyMessage msg = {.button = BSP_BTN_UP,
-            .event = c == '[' ? BTN_EVT_PRESS : BTN_EVT_RELEASE,
-            .mv = static_cast<uint16_t>(c == '[' ? 15 : 2900)};
-        app_registry_dispatch_key(msg.button, msg.event, msg.mv);
+        serial_press(BSP_BTN_UP, c == '[' ? BTN_EVT_PRESS : BTN_EVT_RELEASE,
+                     static_cast<uint16_t>(c == '[' ? 15 : 2900));
     } else if (c == 'p' || c == 'P') {
         // 真机 UI 截图：按横带渲染当前活动屏，把 RGB565 像素以十六进制从
         // console 吐出（主机端 _diag/capture_ui.py 收流并还原成 PNG）。

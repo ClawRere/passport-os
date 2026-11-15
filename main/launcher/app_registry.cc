@@ -166,6 +166,9 @@ void show_clean_launch_notice(passport_app_id_t id);
         ? kCleanTalkMagic : kCleanLaunchMagic;
     s_clean_launch[0] = magic;
     s_clean_launch[1] = static_cast<uint32_t>(id) ^ magic;
+    // Mark fresh heap BEFORE restart so no nested path re-triggers clean launch
+    // on the same boot cycle if something races between the notice and reboot.
+    s_fresh_heap = true;
     ESP_LOGW(TAG, "Restarting for a defragmented heap: target app=%d", (int)id);
     show_clean_launch_notice(id);
 #ifdef ESP_PLATFORM

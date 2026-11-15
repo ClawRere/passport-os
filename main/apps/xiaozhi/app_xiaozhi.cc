@@ -53,7 +53,9 @@ constexpr int kCmdQueueDepth = 8;
 // Opus 编解码 → xzg_audio 常驻共用任务（24KB，见 xiaozhi_audio.cc 的说明）。
 // MCP tool calls run here (JSON, NVS, device control). 2026-11-07 device probe:
 // 1364 B left of 6144 after an in-session music search; heap-allocated per session.
-constexpr size_t kControlTaskStack = 7168;
+// 2026-11-15: bumped from 7168 → 8192 to give deeper JSON/NVS paths headroom
+// without silent stack overflow (the panic threshold is ~200 B below nominal).
+constexpr size_t kControlTaskStack = 8192;
 constexpr uint32_t kLoopTickMs = 20;
 
 // 定时器（毫秒）
@@ -801,6 +803,11 @@ void control_task(void *arg) {
     ESP_LOGI(TAG, "Control task started (stack=%u, free=%u largest=%u)",
              (unsigned)kControlTaskStack, (unsigned)esp_get_free_heap_size(),
              (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
+    // Log high-water mark so any future regression surfaces as a warning,
+    // not a silent restart deep inside an ssl_write call chain.
+    const unsigned stk_init_free = (unsigned)uxTaskGetStackHighWaterMark(nullptr);
+    ESP_LOGI(TAG, "Control task init stack free: %u words (%u B)",
+             stk_init_free, stk_init_free * sizeof(StackType_t));
 
     // 音频子系统不在这里初始化：要等 OTA 的临时任务把 12KB 栈还回来、堆最完整的
     // 时候再创建常驻录音任务（见 do_connect）。
