@@ -143,7 +143,7 @@ bool s_heap_strained = false;
 bool s_fresh_heap = false;
 
 bool heavy_app(passport_app_id_t id) {
-    return id == APP_ID_RADIO || id == APP_ID_NETEASE || id == APP_ID_XIAOZHI ;
+    return id == APP_ID_RADIO || id == APP_ID_NETEASE || id == APP_ID_XIAOZHI;
 }
 
 // 在旧应用 stop() 之后调用:此时测到的才是新应用可用的堆。
