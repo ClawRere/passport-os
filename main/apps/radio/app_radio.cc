@@ -334,6 +334,8 @@ void radio_app_on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
     (void)mv;
     if (!s_player_ready.load()) return;
 
+    // Triple-click OK toggles play/pause, just like a single click on OK.
+    const bool ok_triple = btn == BSP_BTN_OK && event == BTN_EVT_TRIPLE;
     if (event == BTN_EVT_CLICK) {
         if (btn == BSP_BTN_UP) {
             // "+" 短按：切换下一电台
@@ -345,6 +347,8 @@ void radio_app_on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
             // "OK" 短按：播放 / 暂停切换
             radio_player_toggle();
         }
+    } else if (ok_triple) {
+        radio_player_toggle();
     } else if (event == BTN_EVT_LONG) {
         if (btn == BSP_BTN_UP) {
             // "+" 长按: 音量增加

@@ -1072,10 +1072,14 @@ bool app_on_back() {
 }
 
 void app_on_key(uint8_t btn, app_btn_event_t event, uint16_t) {
-    if (!s_active.load() || (event != BTN_EVT_CLICK && event != BTN_EVT_LONG)) return;
+    // Click and long-press are normal navigation/input events.
+    // Triple-click (BTN_EVT_TRIPLE) from the global gesture handler is used
+    // to toggle play/pause when already on the Player page; reject it elsewhere.
+    const bool ok_triple_pause = btn == BSP_BTN_OK && event == BTN_EVT_TRIPLE;
+    if (!s_active.load() || (!(event == BTN_EVT_CLICK || event == BTN_EVT_LONG) && !ok_triple_pause)) return;
     if (!model_lock(200)) return;
     Model &m = model();
-    const bool click = event == BTN_EVT_CLICK;
+    const bool click = event == BTN_EVT_CLICK || ok_triple_pause;
     const int delta = btn == BSP_BTN_UP ? -1 : 1;
     switch (m.page_id) {
     case Page::Message:
