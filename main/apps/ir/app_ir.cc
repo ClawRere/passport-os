@@ -2,7 +2,7 @@
 #include "ir_nec.h"
 #include "launcher/app_registry.h"
 #include "bsp_display.h"
-#include "ui/ui_pixel.h"
+#include "ui_pixel.h"
 #include "app_fonts.h"
 #include "esp_log.h"
 #include "lvgl.h"
