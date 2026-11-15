@@ -2,7 +2,7 @@
 #include "launcher/app_registry.h"
 #include "bsp_display.h"
 #include "bsp_audio.h"
-#include "ui_pixel.h"
+#include "ui/ui_pixel.h"
 #include "app_fonts.h"
 #include "esp_log.h"
 #include "esp_spiffs.h"
@@ -119,7 +119,7 @@ void on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
         } else if (s_state == S_RECORDING) {
             if (s_fp) { fclose(s_fp); s_fp = nullptr; }
             s_state = S_IDLE; scan_files(); s_cur = 0; update_list();
-            lv_label_set_text(s_status, "已保存 · 共%d条，再按OK播放", s_total);
+            lv_label_set_text_fmt(s_status, "已保存 · 共%d条，再按OK播放", s_total);
         }
     } else if (btn == BSP_BTN_UP && s_cur > 0) { s_cur--; update_list(); }
     else if (btn == BSP_BTN_DOWN && s_cur < s_total - 1) { s_cur++; update_list(); }
