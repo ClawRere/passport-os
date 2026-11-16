@@ -1,4 +1,4 @@
-#include "apps/app_base.h"
+﻿#include "apps/app_base.h"
 #include "ir_nec.h"
 #include "launcher/app_registry.h"
 #include "bsp_display.h"
@@ -7,14 +7,13 @@
 #include "esp_log.h"
 #include "lvgl.h"
 
-static const char *TAG = "app_ir";
 static lv_obj_t *s_screen, *s_status;
 
 // Signal index: 0=power,1=vol+,2=vol-,3=mute,4=ch+,5=ch-
 enum { SIG_POWER, SIG_VOL_UP, SIG_VOL_DOWN, SIG_MUTE, SIG_CH_UP, SIG_CH_DOWN, SIG_COUNT };
 static int s_sig_idx = SIG_POWER;
 
-static const char *sig_name[] = { "电源", "音量+", "音量-", "静音", "频道+", "频道-" };
+static const char *sig_name[] = { "鐢垫簮", "闊抽噺+", "闊抽噺-", "闈欓煶", "棰戦亾+", "棰戦亾-" };
 static void (*send_fn[]) (void) = {
     ir_send_power_toggle, ir_send_vol_up, ir_send_vol_down,
     ir_send_vol_mute,     ir_send_ch_up,  ir_send_ch_down,
@@ -36,9 +35,9 @@ static void start(void) {
     if (s_screen) { bsp_lvgl_unlock(); return; }
     s_screen = lv_obj_create(nullptr);
     ui_pixel_background(s_screen);
-    ui_pixel_label(ui_pixel_top_bar(s_screen), "红外遥控", &buddy_font_16, UI_TEXT);
+    ui_pixel_label(ui_pixel_top_bar(s_screen), "绾㈠閬ユ帶", &buddy_font_16, UI_TEXT);
     s_status = nullptr;
-    set_text(&s_status, "就绪 · 按OK发送信号");
+    set_text(&s_status, "灏辩华 路 鎸塐K鍙戦€佷俊鍙?);
     // Show current signal name as secondary info
     {
         lv_obj_t *info = lv_label_create(s_screen);
@@ -50,7 +49,7 @@ static void start(void) {
         lv_obj_set_pos(info, 12, 80);
         lv_obj_set_size(info, 216, 20);
     }
-    static const char *hint[] = { "OK: 发送当前信号", "上键: 切换信号", "下键: 切换信号" };
+    static const char *hint[] = { "OK: 鍙戦€佸綋鍓嶄俊鍙?, "涓婇敭: 鍒囨崲淇″彿", "涓嬮敭: 鍒囨崲淇″彿" };
     for (int i = 0; i < 3; i++) {
         lv_obj_t *h = lv_label_create(s_screen);
         lv_label_set_text(h, hint[i]);
@@ -59,7 +58,7 @@ static void start(void) {
         lv_obj_set_pos(h, 12, 115 + i * 26);
         lv_obj_set_size(h, 216, 22);
     }
-    ui_pixel_footer(s_screen, "", "长按确定返回", &buddy_font_16);
+    ui_pixel_footer(s_screen, "", "闀挎寜纭畾杩斿洖", &buddy_font_16);
     lv_screen_load(s_screen);
     bsp_lvgl_unlock();
 }
@@ -77,7 +76,7 @@ static void on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
     if (btn == BSP_BTN_OK && !ir_nec_is_tx_busy()) {
         send_fn[s_sig_idx]();
         char buf[60];
-        snprintf(buf, sizeof(buf), "已发送 %s · OK再发", sig_name[s_sig_idx]);
+        snprintf(buf, sizeof(buf), "宸插彂閫?%s 路 OK鍐嶅彂", sig_name[s_sig_idx]);
         set_text(&s_status, buf);
     } else if (btn == BSP_BTN_UP && s_sig_idx > 0) {
         --s_sig_idx;
@@ -90,8 +89,8 @@ static void on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
 }
 
 extern const passport_app_t g_ir_app = {
-    .id = APP_ID_IR, .name = "红外遥控", .en_name = "IR Remote",
-    .desc = "发送红外信号\n控制家电", .tag = "GPIO",
+    .id = APP_ID_IR, .name = "绾㈠閬ユ帶", .en_name = "IR Remote",
+    .desc = "鍙戦€佺孩澶栦俊鍙穃n鎺у埗瀹剁數", .tag = "GPIO",
     .theme_color = 0x8CF5A6,
     .init = init, .start = start, .stop = stop, .on_key = on_key,
 };

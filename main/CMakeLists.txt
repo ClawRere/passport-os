@@ -5,6 +5,8 @@ idf_component_register(
         "device_control.cc"
         "device_control_mcp.cc"
         "voice_intent.cc"
+        "apps/reminders/reminder_service.cc"
+        "apps/lists/list_service.cc"
         "apps/aihot/aihot_news.cc"
         "apps/aihot/aihot_mcp.cc"
         "apps/xiaozhi/opus_encoder_storage.cc"
