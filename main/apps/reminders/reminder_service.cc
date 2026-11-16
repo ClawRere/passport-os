@@ -17,7 +17,7 @@ uint32_t revision() { return 0; }
 bool sound_pending() { return false; }
 bool alarm_active() { return false; }
 void dismiss_for_navigation() {}
-void play_music_notice(bool (*)(bool)) {}
+void play_music_notice(bool (*)()) {}
 bool intercept_key(uint8_t, int) { return false; }
 void show_alert(const Record *, const char *) {}
 std::string mcp_result(const char *, const char *, bool *, uint64_t) { return "\"removed\""; }
