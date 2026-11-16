@@ -73,7 +73,7 @@ static void on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
     if (btn == BSP_BTN_OK && !ir_nec_is_tx_busy()) {
         send_fn[s_sig_idx]();
         char buf[60];
-        snprintf(buf, sizeof(buf), "²Ê发送%s OK再发发送", sig_name[s_sig_idx]);
+        snprintf(buf, sizeof(buf), "²Ê发送%s OK再发", sig_name[s_sig_idx]);
         set_text(&s_status, buf);
     } else if (btn == BSP_BTN_UP && s_sig_idx > 0) {
         --s_sig_idx;
