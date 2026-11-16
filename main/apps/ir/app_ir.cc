@@ -4,7 +4,6 @@
 #include "bsp_display.h"
 #include "ui_pixel.h"
 #include "app_fonts.h"
-#include "esp_log.h"
 #include "lvgl.h"
 
 static lv_obj_t *s_screen, *s_status;
