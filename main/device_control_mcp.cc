@@ -1,4 +1,5 @@
 #include "device_control.h"
+#include "launcher/power.h"
 #include "apps/netease/netease_voice_search.h"
 #include "apps/radio/radio_catalog.h"
 #include <apps/xiaozhi/xiaozhi_ui.h>
@@ -17,6 +18,7 @@ R"({"name":"self.screen.set_brightness","description":"Change AND persist this d
 R"({"name":"self.application.open","description":"Open a built-in device app on explicit request. music=网易云音乐; radio=城市收音机; reminders=备忘提醒; lists=文字清单; pomodoro=番茄时钟; settings=设置; home=首页; launcher=应用列表; stopwatch=秒表; tetris=俄罗斯方块; xiaozhi=小智; ir=红外遥控; voicememo=语音备忘. Ask which app if ambiguous. Opens its screen only. Switching exits this Xiaozhi conversation after the tool reply; do not promise continued background voice control.","inputSchema":{"type":"object","properties":{"app":{"type":"string","enum":["music","radio","reminders","lists","pomodoro","settings","home","launcher","stopwatch","tetris","xiaozhi","ir","voicememo"]}},"required":["app"]}})",
 R"({"name":"self.music.search","description":"Search the user's own NetEase Cloud Music (网易云音乐) library on THIS device. Returns up to 5 results (song_id, name, artist) in relevance order. Use this before playing a song so you can pass its song_id to self.music.play.","inputSchema":{"type":"object","properties":{"query":{"type":"string","maxLength":20}},"required":["query"]}})",
 R"({"name":"self.music.play","description":"Play music on THIS device from the user's own logged-in NetEase Cloud Music (网易云音乐) account, which has the user's full library and membership. For EVERY request to play a song, an artist or music use this tool (after self.music.search for a song or artist) and NEVER search_music, play_music or any built-in cloud music tool. source=search: the searched query plus song_id of the chosen result; the other results follow. source=favorites: 我喜欢的音乐; daily: 每日推荐; playlist: the user's own or saved playlist, or a chart 热歌榜/新歌榜/飙升榜/原创榜, given as name. shuffle=true for 随机播放. stop_after_minutes pauses playback later, e.g. 半小时后停 = 30. Exits this Xiaozhi conversation after the reply; open Xiaozhi again for more voice control. Except for a chosen search result the playing song is unknown: do not name one. Favorites, daily and personal playlists need the device logged in.","inputSchema":{"type":"object","properties":{"source":{"type":"string","enum":["search","favorites","daily","playlist"]},"query":{"type":"string","maxLength":20},"song_id":{"type":"integer","minimum":1},"name":{"type":"string","maxLength":20},"shuffle":{"type":"boolean"},"stop_after_minutes":{"type":"integer","minimum":1,"maximum":180}},"required":["source"]}})",
+R"({"name": "self.system.shutdown", "description": "Power off the device immediately (same effect as holding the power button). Screen goes dark and the device enters deep sleep; wake by pressing the UP key. Use after firmware flash is complete, or when the device is no longer needed.", "inputSchema": {"type": "object", "properties": {}}})",
 R"({"name":"self.radio.play","description":"Play live internet radio for a Chinese city or province in this device's 城市收音机 app, e.g. 打开北京的电台 = city 北京. station: optional keywords of a station name such as 交通 or 音乐; otherwise the most popular local station plays. stop_after_minutes pauses the radio later, e.g. 半小时后停 = 30. Exits this Xiaozhi conversation after the reply. Stations come from a public directory, so do not promise a particular one; the result shows on screen.","inputSchema":{"type":"object","properties":{"city":{"type":"string","maxLength":16},"station":{"type":"string","maxLength":10},"stop_after_minutes":{"type":"integer","minimum":1,"maximum":180}},"required":["city"]}})"
 };
 struct App {const char *key; passport_app_id_t id;};
@@ -110,6 +112,10 @@ std::string call(const char *name,const cJSON *args,uint64_t token) {
     else if (!std::strcmp(name,"self.pomodoro.control")) request.action=Action::Pomodoro;
     else if (!std::strcmp(name,"self.music.play") || !std::strcmp(name,"self.radio.play")) request.action=Action::Handover;
     else if (!std::strcmp(name,"self.music.search")) return cJSON_IsObject(args)?search(args):fail("请说出要搜索的歌名或歌手");
+    else if (!std::strcmp(name,"self.system.shutdown")) {
+        power_off("设备已关机");
+        return "";
+    }
     else return {};
     if (!cJSON_IsObject(args)) return fail("请提供有效的设备控制参数");
     request.token=token;
