@@ -441,7 +441,7 @@ void launcher_ui_init(void) {
     }
 
     // Footer
-    ui_pixel_footer(s_screen, "上下切换 · OK 打开", "长按 OK 进小智�xaf�页", &buddy_font_16);
+    ui_pixel_footer(s_screen, "上下切换 · OK 打开", "长按 OK 进小智对话", &buddy_font_16);
 
     // Initial state
     s_col = 0; s_row = 0;
