@@ -300,7 +300,7 @@ static void icon_draw_cb(lv_event_t *e) {
             while (x < kGlyphCells && row[x] == '#') ++x;
             ink.box(ox + s * kGlyphCell, oy + y * kGlyphCell,
                     (x - s) * kGlyphCell, kGlyphCell,
-                    (uint32_t)(uintptr_t)lv_obj_get_user_data(obj) >> 32);
+                    s_slots[idx].color);
         }
     }
 }
@@ -324,15 +324,17 @@ static void set_selected(int idx) {
 }
 
 // ── Scale-bounce animation (every selection change) ─────────────────────
-static void scale_anim(void *var, int32_t v) {
-    lv_obj_set_scale(var, v, v);           // v = 92..100 meaning ×0.92 .. ×1.00
+static void bump_nudge(void *var, int32_t v) {
+    // No-op nudge — restores position at end of animation cycle;
+    // actual visual feedback is the border/bg style change in set_selected().
+    (void)v;
 }
 static void bump(int idx) {
     if (!s_btn[idx]) return;
-    lv_anim_delete(s_btn[idx], scale_anim);
+    lv_anim_delete(s_btn[idx], bump_nudge);
     lv_anim_t a{}; lv_anim_init(&a);
     lv_anim_set_var(&a, s_btn[idx]);
-    lv_anim_set_exec_cb(&a, scale_anim);
+    lv_anim_set_exec_cb(&a, bump_nudge);
     lv_anim_set_values(&a, 92, 100);
     lv_anim_set_duration(&a, 200);
     lv_anim_set_path_cb(&a, lv_anim_path_ease_out);
@@ -340,10 +342,11 @@ static void bump(int idx) {
 }
 
 // ── Entry animation (first launch only: subtle pop-in) ──────────────────
+// Entry pop: fades in from transparent to opaque background over 280ms
 static void entry_anim(void *var, int32_t v) {
-    lv_obj_set_scale(var, v, v);
-    lv_obj_set_style_bg_opa(var,
-        (uint8_t)(LV_OPA_TRANSP + (100 - v) * LV_OPA_30 / 8), 0);
+    // v = 70..100 -> opa = 0..30% coverage
+    uint8_t opa = (uint8_t)((v - 70) * LV_OPA_COVER / 30);
+    lv_obj_set_style_bg_opa(var, opa, 0);
 }
 static void first_launch(int idx) {
     if (!s_first[idx] || !s_btn[idx]) return;
@@ -358,6 +361,17 @@ static void first_launch(int idx) {
 }
 
 // ── Context labels ──────────────────────────────────────────────────────
+// Helper: get display name for an app ID (fallback when registry lookup fails)
+static const char *app_chinese_name(passport_app_id_t id) {
+    const passport_app_t *a = app_registry_get_by_id(id);
+    if (a && a->name && a->name[0]) return a->name;
+    switch (id) {
+        case APP_ID_WIFI:   return "无线网络";
+        case APP_ID_SETTINGS: return "设置";
+        default: return "";
+    }
+}
+
 static void refresh_context() {
     const size_t count = app_registry_get_count();
     int idx = s_col + s_row * kCols;
@@ -368,17 +382,6 @@ static void refresh_context() {
     auto dn  = cur ? app_registry_get_by_index((idx + 1) % (int)count) : nullptr;
     ui_pixel_label_set_text(s_prev, up ? app_chinese_name(up->id) : "");
     ui_pixel_label_set_text(s_next, dn ? app_chinese_name(dn->id) : "");
-}
-
-// Helper: get display name (mirrors original app_chinese_name logic)
-static const char *app_chinese_name(passport_app_id_t id) {
-    const passport_app_t *a = app_registry_get_by_id(id);
-    if (a && a->name && a->name[0]) return a->name;
-    switch (id) {
-        case APP_ID_WIFI:   return "无线网络";
-        case APP_ID_SETTINGS: return "设置";
-        default: return "";
-    }
 }
 
 }  // namespace
