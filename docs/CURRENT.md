@@ -68,3 +68,5 @@ rc.59 实机重试用户已反馈未见问题；其余此前列出的 rc.58 手�
 取得电流计型号/接法/采集能力后，用同一源码仅切换三项省电策略制作 A/B 对照，测首页亮屏、联网熄屏、小智空闲熄屏、离线扫描。记录电压、平均/峰值电流、能量和时间，排除电脑 USB 对轻睡眠的影响。用户未提出新需求时，不主动扩展范围。
 
 仅需要追溯证据时查旧目录 `docs/power-acceptance-20261108.md` 和旁边 `_diag/power-acceptance-20261108/`；不要日常加载所有历史记录。
+
+2026-11-17 六处修复并烧录（commit b028dfe）：①首页长按OK→小智对话；②语音备忘改用 capture init；③红外扩展为6信号 UP/DOWN切换 OK发送；④清单/备忘从抽屉移除（源码留 stub 供 xiaozhi/device_control/netease/power 引用）；⑤CI 全绿（run 43912132499 PASS）；⑥修复烧录偏移错误（误写0x10000导致bootloop，重刷完整镜像至0x00000恢复）。2026-11-17 Launcher 还原：恢复 Apple Watch 风格卡片轮播布局，REMINDERS/LISTS 不出现在 s_slots/s_icons 中；新增 self.system.shutdown MCP 工具（Flash 后或无需使用时可语音关机，等同于长按电源键效果）。CI commit d493fd3。
