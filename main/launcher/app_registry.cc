@@ -22,7 +22,6 @@
 #include "esp_heap_caps.h"
 #include "boot_chime.h"
 #include "ui_sfx.h"
-#include "apps/reminders/reminder_service.h"
 #include "apps/xiaozhi/app_xiaozhi.h"
 #include <atomic>
 #include <vector>
@@ -39,8 +38,6 @@ extern const passport_app_t g_tetris_app;
 extern const passport_app_t g_stopwatch_app;
 extern const passport_app_t g_pomodoro_app;
 extern const passport_app_t g_netease_app;
-extern const passport_app_t g_reminders_app;
-extern const passport_app_t g_lists_app;
 extern const passport_app_t g_ir_app;
 extern const passport_app_t g_voicememo_app;
 
@@ -56,8 +53,6 @@ const passport_app_t *s_apps[] = {
     &g_netease_app,
     &g_pomodoro_app,
     &g_stopwatch_app,
-    &g_reminders_app,
-    &g_lists_app,
     &g_tetris_app,
     &g_ir_app,
     &g_voicememo_app,
@@ -68,7 +63,7 @@ constexpr size_t kAppCount = sizeof(s_apps) / sizeof(s_apps[0]);
 bool feedback_allowed(passport_app_id_t id) {
     return id == APP_ID_HOME || id == APP_ID_LAUNCHER || id == APP_ID_SETTINGS ||
            id == APP_ID_WIFI || id == APP_ID_STOPWATCH || id == APP_ID_POMODORO || id == APP_ID_TETRIS ||
-           id == APP_ID_REMINDERS || id == APP_ID_LISTS || id == APP_ID_IR || id == APP_ID_VOICEMEMO;
+           id == APP_ID_IR || id == APP_ID_VOICEMEMO;
 }
 std::atomic<passport_app_id_t> s_active_id{APP_ID_LAUNCHER};
 wake_gate_t s_wake_gate{};
@@ -523,7 +518,6 @@ void app_registry_dispatch_key(uint8_t btn, app_btn_event_t event, uint16_t mv) 
 
     if (xiaozhi_shortcut) {
         s_ok_long_triggered = false;
-        reminders::dismiss_for_navigation();
         // Already in Xiaozhi: request listening without toggling an active
         // conversation. A pending exit still goes through orderly teardown.
         if (s_active_id == APP_ID_XIAOZHI && s_pending_target == APP_ID_COUNT) {
@@ -554,7 +548,6 @@ void app_registry_dispatch_key(uint8_t btn, app_btn_event_t event, uint16_t mv) 
         return;
     }
 
-    if (reminders::intercept_key(btn,event)) return;
     const auto source = s_active_id.load();
     auto feedback = [&](ui_sfx_kind_t kind) {
         if (s_pending_target == APP_ID_COUNT && !boot_chime_busy() &&
@@ -596,7 +589,15 @@ void app_registry_dispatch_key(uint8_t btn, app_btn_event_t event, uint16_t mv) 
             app_registry_switch_to(APP_ID_LAUNCHER);
             return;
         }
-        // 首页是顶层:不拦不吞,首页 on_key 本身不消费长按 OK。
+        // 首页是顶层：长按OK → 直接启动小智对话（不再无动作）
+        if (s_active_id == APP_ID_HOME) {
+            ESP_LOGI(TAG, "Back: Home -> Xiaozhi conversation");
+            s_ok_long_triggered = true;
+            s_start_xiaozhi_conversation = true;
+            feedback(UI_SFX_CONFIRM);
+            app_registry_switch_to(APP_ID_XIAOZHI);
+            return;
+        }
     }
     if (btn == BSP_BTN_OK && (event == BTN_EVT_RELEASE || event == BTN_EVT_LONG_UP)) {
         if (s_ok_long_triggered) {
@@ -673,7 +674,6 @@ void app_registry_keep_awake(void) {
 }
 
 bool app_registry_sound_notice(void) {
-    if (reminders::alarm_active()) return false;
     SwitchGuard guard;
     // LVGL is already held: a blocking take would invert switch->LVGL order.
     if (!guard.try_take(0) || s_building_target.load() ||

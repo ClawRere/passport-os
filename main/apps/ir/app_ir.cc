@@ -10,6 +10,16 @@
 static const char *TAG = "app_ir";
 static lv_obj_t *s_screen, *s_status;
 
+// Signal index: 0=power,1=vol+,2=vol-,3=mute,4=ch+,5=ch-
+enum { SIG_POWER, SIG_VOL_UP, SIG_VOL_DOWN, SIG_MUTE, SIG_CH_UP, SIG_CH_DOWN, SIG_COUNT };
+static int s_sig_idx = SIG_POWER;
+
+static const char *sig_name[] = { "电源", "音量+", "音量-", "静音", "频道+", "频道-" };
+static void (*send_fn[]) (void) = {
+    ir_send_power_toggle, ir_send_vol_up, ir_send_vol_down,
+    ir_send_vol_mute,     ir_send_ch_up,  ir_send_ch_down,
+};
+
 static void set_text(lv_obj_t **dst, const char *txt) {
     if (*dst) lv_obj_delete(*dst);
     *dst = lv_label_create(s_screen);
@@ -28,7 +38,27 @@ static void start(void) {
     ui_pixel_background(s_screen);
     ui_pixel_label(ui_pixel_top_bar(s_screen), "红外遥控", &buddy_font_16, UI_TEXT);
     s_status = nullptr;
-    set_text(&s_status, "就绪 · 按OK发信号");
+    set_text(&s_status, "就绪 · 按OK发送信号");
+    // Show current signal name as secondary info
+    {
+        lv_obj_t *info = lv_label_create(s_screen);
+        char buf[40];
+        snprintf(buf, sizeof(buf), "[%d/%d] %s", s_sig_idx + 1, SIG_COUNT, sig_name[s_sig_idx]);
+        lv_label_set_text(info, buf);
+        lv_obj_set_style_text_font(info, &lv_font_montserrat_14, 0);
+        lv_obj_set_style_text_color(info, lv_color_hex(UI_ACCENT), 0);
+        lv_obj_set_pos(info, 12, 80);
+        lv_obj_set_size(info, 216, 20);
+    }
+    static const char *hint[] = { "OK: 发送当前信号", "上键: 切换信号", "下键: 切换信号" };
+    for (int i = 0; i < 3; i++) {
+        lv_obj_t *h = lv_label_create(s_screen);
+        lv_label_set_text(h, hint[i]);
+        lv_obj_set_style_text_font(h, &buddy_font_16, 0);
+        lv_obj_set_style_text_color(h, lv_color_hex(UI_TEXT_DIM), 0);
+        lv_obj_set_pos(h, 12, 115 + i * 26);
+        lv_obj_set_size(h, 216, 22);
+    }
     ui_pixel_footer(s_screen, "", "长按确定返回", &buddy_font_16);
     lv_screen_load(s_screen);
     bsp_lvgl_unlock();
@@ -45,8 +75,16 @@ static void on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
     if (event != BTN_EVT_CLICK || !bsp_lvgl_lock(500)) return;
     if (!s_screen) { bsp_lvgl_unlock(); return; }
     if (btn == BSP_BTN_OK && !ir_nec_is_tx_busy()) {
-        ir_send_power_toggle();
-        set_text(&s_status, "已发送 · OK再发");
+        send_fn[s_sig_idx]();
+        char buf[60];
+        snprintf(buf, sizeof(buf), "已发送 %s · OK再发", sig_name[s_sig_idx]);
+        set_text(&s_status, buf);
+    } else if (btn == BSP_BTN_UP && s_sig_idx > 0) {
+        --s_sig_idx;
+        set_text(&s_status, sig_name[s_sig_idx]);
+    } else if (btn == BSP_BTN_DOWN && s_sig_idx < SIG_COUNT - 1) {
+        ++s_sig_idx;
+        set_text(&s_status, sig_name[s_sig_idx]);
     }
     bsp_lvgl_unlock();
 }

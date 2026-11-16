@@ -20,9 +20,7 @@
 #include "bsp_i2c.h"
 #include "ui/ui_capture.h"
 #include "apps/pomodoro/app_pomodoro.h"
-#include "apps/reminders/reminder_service.h"
 #include "device_control.h"
-#include "apps/lists/list_service.h"
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "esp_system.h"
@@ -223,13 +221,12 @@ static void input_task(void *arg) {
         // 100 ms tick, 100 ms for normal foreground, and 500 ms while asleep/idle.
         const bool fast = app_registry_switch_pending() || device_control::pending() ||
                           (app_registry_get_active() == APP_ID_XIAOZHI && !app_registry_background_idle());
-        const bool prompt = fast || !app_registry_background_idle() || reminders::alarm_active();
+        const bool prompt = fast || !app_registry_background_idle();
         if (xQueueReceive(s_key_queue, &msg, pdMS_TO_TICKS(fast ? 20 : prompt ? 100 : 500)) == pdTRUE) {
             dispatch_input_message(msg);
         }
         device_control::poll();
         app_registry_process_pending_switch();
-        reminders::poll();
         settings_tick();
     }
 }
@@ -271,7 +268,6 @@ static void serial_press(uint8_t btn, app_btn_event_t evt, uint16_t mv) {
 }
 
 static void handle_serial_command(int c) {
-    if (c == 'R') { app_registry_switch_to(APP_ID_REMINDERS); return; }
     if (c == 'N') { app_registry_switch_to(APP_ID_NETEASE); return; }
     // Diagnostic equivalent of the resolved physical double-click. It uses
     // the same wake/lifecycle/one-shot conversation path, not a direct mic call.
@@ -396,8 +392,6 @@ extern "C" void app_main(void) {
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
-    reminders::initialize();
-    lists::initialize();
 
     // 头像/名片分区在后台挂载;残留其他固件时在此格式化(十余秒),
     // 不让手机上传请求承担这段耗时。堆此时最完整,SPIFFS 缓冲也放在低地址。

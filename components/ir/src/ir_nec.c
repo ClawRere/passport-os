@@ -44,3 +44,28 @@ void ir_send_power_toggle(void) {
     ir_nec_frame_t f = { .address = 0x0010, .command = 0x44 };
     ir_nec_send(&f);
 }
+// TV volume up (Panasonic/NEC compatible: addr=0x0020)
+void ir_send_vol_up(void) {
+    ir_nec_frame_t f = { .address = 0x0020, .command = 0x41 };
+    ir_nec_send(&f);
+}
+// TV volume down
+void ir_send_vol_down(void) {
+    ir_nec_frame_t f = { .address = 0x0020, .command = 0x40 };
+    ir_nec_send(&f);
+}
+// TV mute
+void ir_send_vol_mute(void) {
+    ir_nec_frame_t f = { .address = 0x0020, .command = 0x43 };
+    ir_nec_send(&f);
+}
+// TV channel up
+void ir_send_ch_up(void) {
+    ir_nec_frame_t f = { .address = 0x0020, .command = 0x0F };
+    ir_nec_send(&f);
+}
+// TV channel down
+void ir_send_ch_down(void) {
+    ir_nec_frame_t f = { .address = 0x0020, .command = 0x1F };
+    ir_nec_send(&f);
+}

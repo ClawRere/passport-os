@@ -21,8 +21,8 @@ R"({"name":"self.radio.play","description":"Play live internet radio for a Chine
 };
 struct App {const char *key; passport_app_id_t id;};
 constexpr App apps[] = {
-    {"music",APP_ID_NETEASE},{"radio",APP_ID_RADIO},{"reminders",APP_ID_REMINDERS},
-    {"lists",APP_ID_LISTS},{"pomodoro",APP_ID_POMODORO},{"settings",APP_ID_SETTINGS},{"home",APP_ID_HOME},
+    {"music",APP_ID_NETEASE},{"radio",APP_ID_RADIO},
+    {"pomodoro",APP_ID_POMODORO},{"settings",APP_ID_SETTINGS},{"home",APP_ID_HOME},
     {"launcher",APP_ID_LAUNCHER},{"stopwatch",APP_ID_STOPWATCH},{"tetris",APP_ID_TETRIS},
     {"xiaozhi",APP_ID_XIAOZHI}
 };
