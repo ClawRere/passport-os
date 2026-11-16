@@ -53,6 +53,9 @@ rc.58：手机电脑语音输入改为复制本项目 GitHub 教程链接；Muse
 - 2026-11-10 小智长文本修正（已烧录）：按实际换行高度判断，用户与小智文字合计超过两行时自动展开为八行阅读区，顶部小表情保留；移除顶部渐隐遮罩，行间距和消息间距统一为 4 px，溢出时按完整行跟随最新文本，避免半行被截断。清空对话后复位，空回复不占行。实际 LVGL 和 buddy_font_16 布局检查覆盖两/三行边界、中文与中英混排、连续追加、长短切换及状态切换；完整主机回归、发布配置构建、布局与 SRAM 检查通过（应用 4,065,984 字节，首块堆 78,784 B）。发布配置 SHA256 cd949c3918451f447f0acd023c67c22f3b21ef6a4624e70f9ebec2181c2e5bfa，版本仍为 0.2.0-rc.58；COM3 已先整片备份、仅更新应用分区，8 MiB 读回应用区一致且每个非应用区字节全部保留，重启完成、heap_ok=1。日志与私密备份在忽略的 output/20261110-xiaozhi-text/；真机长文本观感待用户确认，irmware/ 未替换，未公开发布。
 
 ## 当前待办
+2026-11-17 六处修复并烧录（commit b028dfe）：①首页长按OK→小智对话；②语音备忘改用 capture init；③红外扩展6信号 UP/DOWN切换 OK发送；④清单/备忘从抽屉移除（源码留 stub 供 xiaozhi/device_control/netease/power 引用）；⑤CI 全绿（run 43912132499 PASS）；⑥app 分区仅更新 0x10000，NVS WiFi 凭证、姓名照片 Muse 配置保留。固件 full.bin 3,314,560 B，SHA256 3c654567；读回前 3,314,560 字节与烧录文件完全一致；设备恢复 COM4 ESP32-C3 v1.1。
+
+
 2026-11-15 移除冗余应用并增强首页交互：删除 game(你在狗叫什么)、sound_jump(声音跳一跳)、voice(随身AI)、muse(Muse) 四个应用的构建与图标，清理 app_registry.cc / launcher.cc / device_control_mcp.cc / main.cc 中的孤儿引用；保留 tetris/游戏目录（俄罗斯方块仍使用）。新增 BTN_EVT_TRIPLE 按键事件与 OkGesture 三击检测（kDoubleUs=180ms, kTripleGapUs=280ms）；长按 OK 在首页打开小智对话、三击 OK 将 BTN_EVT_TRIPLE 分发给前台应用（网易云等已实现 toggle 逻辑的应用可直接响应暂停/继续）。WiFi 凭证通过 NVS 持久化，每次固件烧录不重置。2026-11-16 Launcher UI 改版：卡片轮播替换为 Apple Watch 风格 3×4 圆角网格（每格62×52px），选中态带配色边框高亮；首次进入每个应用有淡入动效；上下方向键环绕导航，OK打开。修复 lvgl 兼容问题（`lv_obj_set_scale` 不可用，改用背景透明度动画；多 flag 清除改为分两次调用）。IR应用与语音备忘录新增：ir component（ESP32-C3 GPIO11 NEC TX）、voicememo app（SPIFFS PCM 录音/回放）；三击OK分发给前台应用（网易云/电台 toggle 暂停），长按OK首页进小智对话；WiFi NVS持久化不重置。修复时间同步依赖（恢复 nvs_settings.c + time_sync.c 构建）及 IR 组件 C++ 链接问题（ir_nec.h extern C）。完整主机回归 + CI 构建全部通过（run 43884414402 @ 247eff7，PASS）。2026-11-16 23:09 COM4 全片烧录 FoloToy-AI-Passport-full.bin（3,370,080 B，写 9.4s，hash 校验通过；读回 app 分区 4 MB 确认一致性）；堆检查 heap_ok=1，启动完成，进入应用网格界面。
 
 
