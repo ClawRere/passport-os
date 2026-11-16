@@ -346,7 +346,7 @@ static void bump(int idx) {
 static void entry_anim(void *var, int32_t v) {
     // v = 70..100 -> opa = 0..30% coverage
     uint8_t opa = (uint8_t)((v - 70) * LV_OPA_COVER / 30);
-    lv_obj_set_style_bg_opa(var, opa, 0);
+    lv_obj_set_style_bg_opa((lv_obj_t *)var, opa, 0);
 }
 static void first_launch(int idx) {
     if (!s_first[idx] || !s_btn[idx]) return;
@@ -461,7 +461,8 @@ void launcher_ui_init(void) {
             lv_label_set_text(ico, "");
             lv_obj_set_pos(ico, 0, 0);
             lv_obj_set_size(ico, kCellW, 44);
-            lv_obj_clear_flag(ico, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+            lv_obj_clear_flag(ico, LV_OBJ_FLAG_CLICKABLE);
+            lv_obj_clear_flag(ico, LV_OBJ_FLAG_SCROLLABLE);
             lv_obj_remove_style_all(ico);
             lv_obj_add_event_cb(ico, icon_draw_cb, LV_EVENT_DRAW_MAIN, nullptr);
             s_icon[idx] = ico;
