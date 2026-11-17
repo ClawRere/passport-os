@@ -351,7 +351,7 @@ void launcher_ui_init(void) {
 
     s_screen = lv_obj_create(nullptr);
     lv_obj_clear_flag(s_screen, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_style_bg_color(s_screen, lv_color_hex(UI_BG), 0);
+    lv_obj_set_style_bg_color(s_screen, lv_color_hex(0xFFFFFF), 0); // pure white
     lv_obj_set_style_border_width(s_screen, 0, 0);
     lv_obj_set_style_pad_all(s_screen, 0, 0);
 
@@ -431,9 +431,9 @@ void launcher_ui_init(void) {
             auto *lab = ui_pixel_label(btn, app_chinese_name(app->id),
                                         &buddy_font_16, UI_TEXT_DIM);
             lv_obj_set_pos(lab, 0, 44);
-            lv_obj_set_size(lab, kCellW, 8);
+            lv_obj_set_size(lab, kCellW, 16); // allow wrap for longer names
             lv_obj_set_style_text_align(lab, LV_TEXT_ALIGN_CENTER, 0);
-            lv_label_set_long_mode(lab, LV_LABEL_LONG_DOT);
+            lv_label_set_long_mode(lab, LV_LABEL_LONG_WRAP);
             s_lbl[idx] = lab;
 
             s_btn[idx] = btn;
@@ -501,7 +501,6 @@ void launcher_ui_on_key(uint8_t btn, app_btn_event_t event) {
         s_row = idx / kCols;
         bsp_lvgl_lock(-1);
         set_selected(idx);
-        bump(idx);
         refresh_context();
         bsp_lvgl_unlock();
     } else if (btn == BSP_BTN_DOWN && event == BTN_EVT_CLICK) {
@@ -511,7 +510,6 @@ void launcher_ui_on_key(uint8_t btn, app_btn_event_t event) {
         s_row = idx / kCols;
         bsp_lvgl_lock(-1);
         set_selected(idx);
-        bump(idx);
         refresh_context();
         bsp_lvgl_unlock();
     } else if (btn == BSP_BTN_OK && event == BTN_EVT_CLICK) {
