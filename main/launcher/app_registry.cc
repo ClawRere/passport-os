@@ -171,7 +171,7 @@ std::atomic<bool> s_screen_on{true};
 std::atomic<passport_app_id_t> s_pending_target{APP_ID_COUNT};
 esp_pm_lock_handle_t s_display_awake_lock = nullptr;
 std::atomic<int64_t> s_last_activity_us{0};
-std::atomic<uint16_t> s_screen_timeout_seconds{60};
+std::atomic<uint16_t> s_screen_timeout_seconds{900}; // 15 min idle sleep
 
 // 长按 OK 强制返回标志
 bool s_ok_long_triggered = false;
