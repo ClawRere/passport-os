@@ -446,7 +446,6 @@ void launcher_ui_init(void) {
     // Initial state
     s_col = 0; s_row = 0;
     set_selected(0);
-    bump(0);
     refresh_context();
 
     lv_scr_load(s_screen);
@@ -458,7 +457,6 @@ void launcher_ui_show(void) {
     if (!s_screen) { launcher_ui_init(); return; }
     bsp_lvgl_lock(-1);
     set_selected(s_col + s_row * kCols);
-    bump(s_col + s_row * kCols);
     refresh_context();
     bsp_lvgl_unlock();
 }
