@@ -1,5 +1,7 @@
 # 当前状态
 
+2026-11-17 代码修改并提交 (commit 891f993)：移除倒计时功能，保留手电筒开关，application.open 添加 ir/voicememo 选项，恢复 app_registry 中的红外遥控和语音备忘注册。因 WSL 未安装无法编译新固件，使用现有 build-artifact 固件烧录测试。
+
 基线：2026-11-08，从 `F:/WORK/AI硬件/passport-os` 的实际工作目录整理，包含未提交源码。不是仅按 Git HEAD 导出的旧版本。
 
 GitHub（2026-11-14）：当前目录已关联 `https://github.com/manchunx7-bit/passport-os.git`。按用户要求，将远程旧版 `b70879b3c4be0751cb728b8b0c421dd2d1524fdb` 保留为 `codex/archive-before-rc59-20261114` 分支。本地 `codex/rc59-review` 基于该远程 `main` 基线整理 rc.59 新版源码；用户完成首页说明审阅后，已明确同意创建提交并推送到 `main`，保留已有历史，不使用强推。具体提交与远程同步状态以 Git 为准。本次授权为源码提交和推送，不包含创建固件 Release 或再次烧录。用户已反馈已烧录版本实机重试未见问题，选择保留网易云现有 HTTP 传输方案。
