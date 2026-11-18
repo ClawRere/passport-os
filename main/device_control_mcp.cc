@@ -3,6 +3,7 @@
 #include "apps/netease/netease_voice_search.h"
 #include "apps/radio/radio_catalog.h"
 #include <apps/xiaozhi/xiaozhi_ui.h>
+#include <apps/homeassistant/ha_client.h>
 #include <apps/home/home_weather.h>
 #include <driver/gpio.h>
 #include <esp_timer.h>
