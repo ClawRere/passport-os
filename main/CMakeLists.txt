@@ -115,8 +115,8 @@ add_custom_command(OUTPUT "${phone_setup_gz}"
     VERBATIM)
 add_custom_target(phone_setup_gz DEPENDS "${phone_setup_gz}")
 add_dependencies(${COMPONENT_LIB} phone_setup_gz)
-target_add_binary_data(${COMPONENT_LIB} "${phone_setup_gz},
-        "apps/homeassistant/ha_client.cc"" BINARY)
+target_add_binary_data(${COMPONENT_LIB} "${phone_setup_gz}" BINARY)
+target_add_binary_data(${COMPONENT_LIB} "apps/homeassistant/ha_client.cc" BINARY)
 
 if(PASSPORT_RADIO_HLS_TEST)
     target_compile_definitions(${COMPONENT_LIB} PRIVATE PASSPORT_RADIO_HLS_TEST=1)

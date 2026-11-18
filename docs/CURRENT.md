@@ -17,6 +17,9 @@ GitHub（2026-11-14）：当前目录已关联 `https://github.com/manchunx7-bit
 - AI 资讯及其他应用：`main/apps/aihot/`、游戏、秒表等相应目录。13 个抽屉卡片的名称/顺序以 `app_registry.cc` 为准。
 - 字库 `main/fonts/`，统一 UI `main/ui/`；Wi-Fi `components/esp-wifi-connect/`，硬件 `components/bsp/`。
 
+
+2026-11-17 移除红外遥控，新增 Home Assistant REST API 集成：删除 IR 应用及相关代码；新增 main/apps/homeassistant/ha_client.{h,cc}，实现 HA 服务调用(self.ha.call_service)和状态查询(self.ha.get_state)；配置通过 NVS 存储(HA URL + Long-Lived Access Token)。commit 7c55531。
+
 ## 最新行为与边界
 
 rc.59（2026-11-11，已烧录）：小智退出前发 WebSocket PING 唤醒接收任务（退出等待约 0.98 s→0.1 s），退出中不刷新“离线”；首页进入 4 s 内不发起到期天气请求（路过首页不再被 TLS 握手卡约 0.9 s）；网易云启动登录/歌单以优先级 3 运行，首屏不被 HTTPS 握手卡住（约 1.1 s→0.3 s）。串口实测小智→电台约 1.4 s→0.5 s、小智→网易云约 2 s→0.4 s。切换期间锁 CPU 满频经实测无效，已撤回。
