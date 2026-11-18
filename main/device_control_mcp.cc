@@ -20,7 +20,7 @@ R"({"name":"self.pomodoro.control","description":"Control or query the device's 
 R"({"name":"self.device.get_status","description":"Read this device's saved speaker volume, screen brightness, battery percentage and current app. All values are real — do not guess or make up numbers..","inputSchema":{"type":"object","properties":{}}})",
 R"({"name":"self.audio.set_volume","description":"Change AND persist this device's master speaker volume. Use exactly one of percent (absolute 0..100) or delta (signed percentage points -100..100). For louder/quieter without an amount use delta +10/-10. Zero mutes speech and media; timer and reminder alarms still ring at their fixed alert level. Only claim saved on saved=true; report the returned volume_percent. No external player or server setting is needed.","inputSchema":{"type":"object","properties":{"percent":{"type":"integer","minimum":0,"maximum":100},"delta":{"type":"integer","minimum":-100,"maximum":100}}}})",
 R"({"name":"self.screen.set_brightness","description":"Change AND persist this device's screen brightness. Use exactly one of percent (absolute 10..100) or delta (signed percentage points -100..100). For brighter/dimmer without an amount use delta +10/-10. Values clamp to 10..100 to keep the display readable. Only claim saved on saved=true; report brightness_percent. Survives reboot and screen sleep/wake.","inputSchema":{"type":"object","properties":{"percent":{"type":"integer","minimum":10,"maximum":100},"delta":{"type":"integer","minimum":-100,"maximum":100}}}})",
-R"({"name":"self.application.open","description":"Open a built-in device app on explicit request. music=网易云音乐; radio=城市收音机; reminders=备忘提醒; lists=文字清单; pomodoro=番茄时钟; settings=设置; home=首页; launcher=应用列表; stopwatch=秒表; tetris=俄罗斯方块; xiaozhi=小智; ir=红外遥控; voicememo=语音备忘. Ask which app if ambiguous. Opens its screen only. Switching exits this Xiaozhi conversation after the tool reply; do not promise continued background voice control.","inputSchema":{"type":"object","properties":{"app":{"type":"string","enum":["music","radio","reminders","lists","pomodoro","settings","home","launcher","stopwatch","tetris","xiaozhi"]}},"required":["app"]}})",
+R"({"name":"self.application.open","description":"Open a built-in device app on explicit request. music=网易云音乐; radio=城市收音机; pomodoro=番茄时钟; settings=设置; home=首页; launcher=应用列表; xiaozhi=小智; Ask which app if ambiguous. Opens its screen only. Switching exits this Xiaozhi conversation after the tool reply; do not promise continued background voice control.","inputSchema":{"type":"object","properties":{"app":{"type":"string","enum":["music","radio","pomodoro","settings","home","launcher","xiaozhi"]}},"required":["app"]}})",
 R"({"name":"self.music.search","description":"Search the user's own NetEase Cloud Music (网易云音乐) library on THIS device. Returns up to 5 results (song_id, name, artist) in relevance order. Use this before playing a song so you can pass its song_id to self.music.play.","inputSchema":{"type":"object","properties":{"query":{"type":"string","maxLength":20}},"required":["query"]}})",
 R"({"name":"self.music.play","description":"Play music on THIS device from the user's own logged-in NetEase Cloud Music (网易云音乐) account, which has the user's full library and membership. For EVERY request to play a song, an artist or music use this tool (after self.music.search for a song or artist) and NEVER search_music, play_music or any built-in cloud music tool. source=search: the searched query plus song_id of the chosen result; the other results follow. source=favorites: 我喜欢的音乐; daily: 每日推荐; playlist: the user's own or saved playlist, or a chart 热歌榜/新歌榜/飙升榜/原创榜, given as name. shuffle=true for 随机播放. stop_after_minutes pauses playback later, e.g. 半小时后停 = 30. Exits this Xiaozhi conversation after the reply; open Xiaozhi again for more voice control. Except for a chosen search result the playing song is unknown: do not name one. Favorites, daily and personal playlists need the device logged in.","inputSchema":{"type":"object","properties":{"source":{"type":"string","enum":["search","favorites","daily","playlist"]},"query":{"type":"string","maxLength":20},"song_id":{"type":"integer","minimum":1},"name":{"type":"string","maxLength":20},"shuffle":{"type":"boolean"},"stop_after_minutes":{"type":"integer","minimum":1,"maximum":180}},"required":["source"]}})",
 R"({"name": "self.system.shutdown", "description": "Power off the device immediately (same effect as holding the power button). Screen goes dark and the device enters deep sleep; wake by pressing the UP key. Use after firmware flash is complete, or when the device is no longer needed.", "inputSchema": {"type": "object", "properties": {}}})",
@@ -35,8 +35,6 @@ constexpr App apps[] = {
     {"launcher",APP_ID_LAUNCHER},{"stopwatch",APP_ID_STOPWATCH},{"tetris",APP_ID_TETRIS},
     {"xiaozhi",APP_ID_XIAOZHI}
 };
-// Countdown state — persists until cancelled or powered off.
-
 const char *app_key(passport_app_id_t id) {
     for (const auto &app : apps) if (app.id == id) return app.key;
     return "unknown";
@@ -123,10 +121,7 @@ std::string weather_show(const cJSON *args) {
     char city[17] = {};
     const char *err = nullptr;
     if (!text_field(args,"city",true,city,sizeof(city),&err)) return fail(err);
-    if (!home_weather_allow_requests) {
-        // Try to kick off fetching; best effort.
-        home_weather_allow_requests();
-    }
+    home_weather_allow_requests();
     home_weather_t w{};
     const bool ok = home_weather_get(&w);
     Json v(cJSON_CreateObject(),cJSON_Delete);
@@ -136,7 +131,7 @@ std::string weather_show(const cJSON *args) {
         cJSON_AddBoolToObject(v.get(),"success",false);
         return reply(v.get(),true);
     }
-    cJSON_AddNumberToObject(v.get(),"temperature_celsius", static_cast<double>(w.temperature_c));
+    cJSON_AddNumberToObject(v.get(),"temperature_celsius", static_cast<double>(w.temp_c));
     cJSON_AddStringToObject(v.get(),"condition", home_weather_code_text(w.code));
     cJSON_AddNumberToObject(v.get(),"humidity_percent", static_cast<double>(w.humidity));
     cJSON_AddNumberToObject(v.get(),"wind_kmh", static_cast<double>(w.wind_kmh));
@@ -164,7 +159,7 @@ std::string call(const char *name,const cJSON *args,uint64_t token) {
         power_off("设备已关机");
         return "";
     } else if (!std::strcmp(name,"self.flashlight.toggle")) {
-        const cJSON *on_arg = cJSON_GetObjectItemCaseSensitive(args ? args : cJSON_GetNullObject(), "on");
+        const cJSON *on_arg = cJSON_GetObjectItemCaseSensitive(args, "on");
         if (on_arg && cJSON_IsBool(on_arg)) {
             if (cJSON_IsTrue(on_arg)) flashlight_on(); else flashlight_off();
         } else {
@@ -174,9 +169,6 @@ std::string call(const char *name,const cJSON *args,uint64_t token) {
         }
         Json v(cJSON_CreateObject(),cJSON_Delete);
         cJSON_AddBoolToObject(v.get(),"flashlight_on", gpio_get_level((gpio_num_t)BSP_LCD_BL) == 0);
-        return reply(v.get(),false);
-        Json v(cJSON_CreateObject(),cJSON_Delete);
-        cJSON_AddBoolToObject(v.get(),"cancelled",true);
         return reply(v.get(),false);
     } else if (!std::strcmp(name,"self.weather.show")) {
         return weather_show(args);
