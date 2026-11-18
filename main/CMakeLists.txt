@@ -57,7 +57,16 @@ idf_component_register(
         "apps/pomodoro/app_pomodoro.cc"
         "apps/pomodoro/pomodoro_font_20.c"
         "apps/pomodoro/pomodoro_digits_48.c"
+        "apps/reminders/reminder_service.cc"
+        "apps/lists/list_service.cc"
+        "apps/stopwatch/stopwatch_core.c"
+        "apps/stopwatch/app_stopwatch.cc"
+        "apps/game/tetris_core.c"
+        "apps/game/app_tetris.cc"
+        "apps/voice/time_sync.c"
+        "apps/voice/nvs_settings.c"
          "apps/ir/app_ir.cc"
+         "apps/voicememo/app_voicememo.cc"
     INCLUDE_DIRS
         "."
         "launcher"
@@ -66,7 +75,7 @@ idf_component_register(
         "apps/voice"
         "apps/xiaozhi"
         "apps/home"
-
+        "apps/game"
         "ui"
         "fonts"
     REQUIRES
